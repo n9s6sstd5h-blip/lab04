@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            cc: gcc
+            cxx: g++
+            cmake_args: -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+          - os: ubuntu-latest
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            cmake_args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          - os: macos-latest
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            cmake_args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          - os: windows-latest
+            compiler: msvc
+            cc: cl
+            cxx: cl
+            cmake_args: -G "Visual Studio 17 2022" -A x64
+
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B _build -DCMAKE_INSTALL_PREFIX=_install ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build _build --config Release --parallel
+
+      - name: Install
+        run: cmake --install _build --config Release --prefix _install
+
+      - name: Run hello_world
+        if: runner.os != 'Windows'
+        run: ./_install/bin/hello_world
+
+      - name: Run solver
+        if: runner.os != 'Windows'
+        run: printf "1 -3 2\n" | ./_install/bin/solver
+
+      - name: Run hello_world on Windows
+        if: runner.os == 'Windows'
+        run: ./_install/bin/hello_world.exe
+
+      - name: Run solver on Windows
+        if: runner.os == 'Windows'
+        run: echo 1 -3 2 | ./_install/bin/solver.exe
