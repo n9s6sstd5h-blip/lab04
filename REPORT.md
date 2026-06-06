@@ -78,7 +78,7 @@ strategy:
         cc: clang
         cxx: clang++
         cmake_args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-      - os: windows-latest
+      - os: windows-2022
         compiler: msvc
         cc: cl
         cxx: cl
