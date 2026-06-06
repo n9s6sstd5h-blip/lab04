@@ -90,7 +90,7 @@ strategy:
 Основные шаги workflow:
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v6
 - run: cmake -S . -B _build -DCMAKE_INSTALL_PREFIX=_install ${{ matrix.cmake_args }}
 - run: cmake --build _build --config Release --parallel
 - run: cmake --install _build --config Release --prefix _install
